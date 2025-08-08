@@ -79,7 +79,7 @@ class TestDependency:
         dep.fetch(target_dir)
 
         try:
-            assert os.path.exists(os.path.join(target_dir, "include_me", "good.txt"))
+            assert os.path.exists(os.path.join(target_dir, "genesis_core_test_dir", "include_me", "good.txt"))
             assert not os.path.exists(os.path.join(target_dir, "exclude_me"))
         finally:
             shutil.rmtree(src_dir)
