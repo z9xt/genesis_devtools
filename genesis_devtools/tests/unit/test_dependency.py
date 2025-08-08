@@ -53,6 +53,36 @@ class TestDependency:
         finally:
             shutil.rmtree("/tmp/genesis_core_test_dir")
             shutil.rmtree("/tmp/___deps_dir")
+        def test_local_path_fetch_with_exclude(
+        self, build_config: tp.Dict[str, tp.Any]
+    ) -> None:
+        # Preparing a test directory
+        src_dir = "/tmp/genesis_core_test_dir"
+        os.makedirs(src_dir, exist_ok=True)
+        os.makedirs(os.path.join(src_dir, "exclude_me"), exist_ok=True)
+        os.makedirs(os.path.join(src_dir, "include_me"), exist_ok=True)
+        with open(os.path.join(src_dir, "exclude_me", "bad.txt"), "w") as f:
+            f.write("should be excluded")
+        with open(os.path.join(src_dir, "include_me", "good.txt"), "w") as f:
+            f.write("should be included")
+
+        # Add exclude to config
+        dep_config = dict(build_config["deps"][0])
+        dep_config["exclude"] = ["exclude_me"]
+
+        dep = deps.LocalPathDependency.from_config(dep_config, "/tmp")
+
+        target_dir = "/tmp/deps_dir_exclude_test"
+        os.makedirs(target_dir, exist_ok=True)
+
+        dep.fetch(target_dir)
+
+        try:
+            assert os.path.exists(os.path.join(target_dir, "include_me", "good.txt"))
+            assert not os.path.exists(os.path.join(target_dir, "exclude_me"))
+        finally:
+            shutil.rmtree(src_dir)
+            shutil.rmtree(target_dir)
 
     def test_http_from_config(
         self, build_config: tp.Dict[str, tp.Any]
