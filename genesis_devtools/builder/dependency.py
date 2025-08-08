@@ -46,22 +46,22 @@ class LocalPathDependency(base.AbstractDependency):
         return self._local_path
 
     def fetch(self, output_dir: str) -> None:
-        """Fetch the dependency."""
         path = self._path
         if os.path.isdir(path):
-            # Remove trailing slash
             if path.endswith("/"):
                 path = path[:-1]
-
             name = os.path.basename(path)
-            
+
             def _ignore_func(dir, files):
-                return [f for f in files if f in self._exclude]
+                ignored = []
+                for f in files:
+                    if f in self._exclude:
+                        ignored.append(f)
+                return ignored
 
             shutil.copytree(path,
-                os.path.join(output_dir, name),
-                ignore=_ignore_func)
-
+                            os.path.join(output_dir, name),
+                            ignore=_ignore_func)
             self._local_path = os.path.join(output_dir, name)
         else:
             shutil.copy(path, output_dir)
