@@ -54,10 +54,14 @@ class LocalPathDependency(base.AbstractDependency):
                 path = path[:-1]
 
             name = os.path.basename(path)
+            
+            def _ignore_func(dir, files):
+                return [f for f in files if f in self._exclude]
+
             shutil.copytree(path,
                 os.path.join(output_dir, name),
-                ignore=shutil.ignore_patterns(*self._exclude)
-            )
+                ignore=_ignore_func)
+
             self._local_path = os.path.join(output_dir, name)
         else:
             shutil.copy(path, output_dir)
