@@ -53,7 +53,8 @@ class TestDependency:
         finally:
             shutil.rmtree("/tmp/genesis_core_test_dir")
             shutil.rmtree("/tmp/___deps_dir")
-        def test_local_path_fetch_with_exclude(
+
+    def test_local_path_fetch_with_exclude(
         self, build_config: tp.Dict[str, tp.Any]
     ) -> None:
         # Preparing a test directory
