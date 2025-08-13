@@ -54,9 +54,11 @@ class TestDependency:
             shutil.rmtree("/tmp/genesis_core_test_dir")
             shutil.rmtree("/tmp/___deps_dir")
 
-    def test_local_path_fetch_with_exclude(self, build_config: tp.Dict[str, tp.Any]) -> None:
-        
-        #aliases block
+    def test_local_path_fetch_with_exclude(
+        self, build_config: tp.Dict[str, tp.Any]
+    ) -> None:
+
+        # aliases block
         def join_path(*parts):
             return os.path.join(*parts)
 
@@ -86,8 +88,16 @@ class TestDependency:
         write_file(join_path(src_dir, "build1", "file1.txt"), "include build1")
         write_file(join_path(src_dir, "build2", "file2.txt"), "exclude build2")
         write_file(join_path(src_dir, "build3", "file3.txt"), "include build3")
-        write_file(join_path(src_dir, "build3", "build2", "file_in_build3_build2.txt"), "include nested build2 in build3")
-        write_file(join_path(src_dir, "nested", "build2", "file_nested.txt"), "exclude nested/build2")
+        write_file(
+            join_path(
+                src_dir, "build3", "build2", "file_in_build3_build2.txt"
+            ),
+            "include nested build2 in build3",
+        )
+        write_file(
+            join_path(src_dir, "nested", "build2", "file_nested.txt"),
+            "exclude nested/build2",
+        )
 
         # Multiple exclude by pattern test
         make_dir(src_dir, "files")
@@ -99,9 +109,9 @@ class TestDependency:
         # Exclude config
         dep_config = dict(build_config["deps"][0])
         dep_config["exclude"] = [
-            "build2",             # exclude 1-lvl build2 folder
-            "nested/build2",      # exclude 2-lvl nested/build2
-            "/files/file*",       # exclude all file*.test
+            "build2",  # exclude 1-lvl build2 folder
+            "nested/build2",  # exclude 2-lvl nested/build2
+            "/files/file*",  # exclude all file*.test
         ]
 
         dep = deps.LocalPathDependency.from_config(dep_config, "/tmp")
@@ -117,7 +127,9 @@ class TestDependency:
             # Checks
             assert exists(base_target, "build1", "file1.txt")
             assert not_exists(base_target, "build2")
-            assert exists(base_target, "build3", "build2", "file_in_build3_build2.txt")
+            assert exists(
+                base_target, "build3", "build2", "file_in_build3_build2.txt"
+            )
             assert not_exists(base_target, "nested", "build2")
             assert exists(base_target, "files")
             assert exists(base_target, "files", "life.test")

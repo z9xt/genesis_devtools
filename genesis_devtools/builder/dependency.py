@@ -29,7 +29,9 @@ from genesis_devtools.builder import base
 class LocalPathDependency(base.AbstractDependency):
     """Local path dependency item."""
 
-    def __init__(self, path: str, img_dest: str, exclude: list[str] | None = None) -> None:
+    def __init__(
+        self, path: str, img_dest: str, exclude: list[str] | None = None
+    ) -> None:
         super().__init__()
         self._path = path
         self._img_dest = img_dest
@@ -53,20 +55,22 @@ class LocalPathDependency(base.AbstractDependency):
             ignored = set()
 
             for pattern in self._exclude:
-                pattern = pattern.lstrip("/") 
+                pattern = pattern.lstrip("/")
                 for name in names:
-                    rel_path = os.path.relpath(os.path.join(dirpath, name), path)
+                    rel_path = os.path.relpath(
+                        os.path.join(dirpath, name), path
+                    )
                     if fnmatch.fnmatch(rel_path, pattern):
                         ignored.add(name)
             return ignored
-        
+
         if os.path.isdir(path):
             if path.endswith("/"):
                 path = path[:-1]
             name = os.path.basename(path)
-            shutil.copytree(path,
-                            os.path.join(output_dir, name),
-                            ignore=_ignore_func)
+            shutil.copytree(
+                path, os.path.join(output_dir, name), ignore=_ignore_func
+            )
             self._local_path = os.path.join(output_dir, name)
         else:
             shutil.copy(path, output_dir)
