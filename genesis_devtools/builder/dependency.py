@@ -21,6 +21,7 @@ import typing as tp
 
 import git
 import bazooka
+import fnmatch
 
 from genesis_devtools.builder import base
 
@@ -28,11 +29,12 @@ from genesis_devtools.builder import base
 class LocalPathDependency(base.AbstractDependency):
     """Local path dependency item."""
 
-    def __init__(self, path: str, img_dest: str) -> None:
+    def __init__(self, path: str, img_dest: str, exclude: list[str] | None = None) -> None:
         super().__init__()
         self._path = path
         self._img_dest = img_dest
         self._local_path = None
+        self._exclude = exclude or []
 
     @property
     def img_dest(self) -> str | None:
@@ -45,15 +47,26 @@ class LocalPathDependency(base.AbstractDependency):
         return self._local_path
 
     def fetch(self, output_dir: str) -> None:
-        """Fetch the dependency."""
         path = self._path
+
+        def _ignore_func(dirpath, names):
+            ignored = set()
+
+            for pattern in self._exclude:
+                pattern = pattern.lstrip("/") 
+                for name in names:
+                    rel_path = os.path.relpath(os.path.join(dirpath, name), path)
+                    if fnmatch.fnmatch(rel_path, pattern):
+                        ignored.add(name)
+            return ignored
+        
         if os.path.isdir(path):
-            # Remove trailing slash
             if path.endswith("/"):
                 path = path[:-1]
-
             name = os.path.basename(path)
-            shutil.copytree(path, os.path.join(output_dir, name))
+            shutil.copytree(path,
+                            os.path.join(output_dir, name),
+                            ignore=_ignore_func)
             self._local_path = os.path.join(output_dir, name)
         else:
             shutil.copy(path, output_dir)
@@ -72,11 +85,12 @@ class LocalPathDependency(base.AbstractDependency):
 
         path = dep_config["path"]["src"]
         img_dest = dep_config["dst"]
+        exclude = dep_config["exclude"] if "exclude" in dep_config else []
 
         if not os.path.isabs(path):
             path = os.path.join(work_dir, path)
 
-        return cls(path, img_dest)
+        return cls(path, img_dest, exclude)
 
 
 class LocalEnvPathDependency(base.AbstractDependency):
