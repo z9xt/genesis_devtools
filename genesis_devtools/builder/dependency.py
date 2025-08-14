@@ -49,6 +49,7 @@ class LocalPathDependency(base.AbstractDependency):
         return self._local_path
 
     def fetch(self, output_dir: str) -> None:
+        """Fetch the dependency."""
         path = self._path
 
         def _ignore_func(dirpath, names):
@@ -56,6 +57,7 @@ class LocalPathDependency(base.AbstractDependency):
 
             for pattern in self._exclude:
                 pattern = pattern.lstrip("/")
+
                 for name in names:
                     rel_path = os.path.relpath(
                         os.path.join(dirpath, name), path
@@ -65,6 +67,7 @@ class LocalPathDependency(base.AbstractDependency):
             return ignored
 
         if os.path.isdir(path):
+            # Remove trailing slash
             if path.endswith("/"):
                 path = path[:-1]
             name = os.path.basename(path)
@@ -89,7 +92,7 @@ class LocalPathDependency(base.AbstractDependency):
 
         path = dep_config["path"]["src"]
         img_dest = dep_config["dst"]
-        exclude = dep_config["exclude"] if "exclude" in dep_config else []
+        exclude = dep_config.get("exclude", [])
 
         if not os.path.isabs(path):
             path = os.path.join(work_dir, path)
