@@ -183,7 +183,7 @@ class TestDependency:
         return os.path.join(target_dir, os.path.basename(src_dir))
 
     def test_exclude_dir_root_lvl(self):
-        # Example 1. Exclude the build file from root
+        # Exclude the build file from root
         src_dir = "/tmp/genesis_core_test_dir"
         target_dir = "/tmp/deps_test"
         base_dep_config = {
@@ -249,7 +249,6 @@ class TestDependency:
             shutil.rmtree(target_dir)
 
     def test_exclude_nested_folder(self):
-        # Example 3
         src_dir = "/tmp/genesis_core_test_dir"
         target_dir = "/tmp/deps_test"
         base_dep_config = {
@@ -283,7 +282,6 @@ class TestDependency:
             shutil.rmtree(target_dir)
 
         def test_exclude_wildcards(self):
-            # Wildcards test
             src_dir = "/tmp/genesis_core_test_dir"
             target_dir = "/tmp/deps_test"
             base_dep_config = {

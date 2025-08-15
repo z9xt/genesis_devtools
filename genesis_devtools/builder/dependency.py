@@ -48,23 +48,27 @@ class LocalPathDependency(base.AbstractDependency):
         """Local path to the dependency."""
         return self._local_path
 
+    def _ignore_func(self, dirpath: str, names: list[str]) -> list[str] | None:
+        # Ignore files based on the exclude patterns.
+
+        if not self._exclude:
+            return None
+
+        ignored: set[str] = set()
+
+        for pattern in self._exclude:
+            pattern = pattern.lstrip("/")
+            for name in names:
+                rel_path = os.path.relpath(
+                    os.path.join(dirpath, name), self._path
+                )
+                if fnmatch.fnmatch(rel_path, pattern):
+                    ignored.add(name)
+        return list(ignored)
+
     def fetch(self, output_dir: str) -> None:
         """Fetch the dependency."""
         path = self._path
-
-        def _ignore_func(dirpath, names):
-            ignored = set()
-
-            for pattern in self._exclude:
-                pattern = pattern.lstrip("/")
-
-                for name in names:
-                    rel_path = os.path.relpath(
-                        os.path.join(dirpath, name), path
-                    )
-                    if fnmatch.fnmatch(rel_path, pattern):
-                        ignored.add(name)
-            return ignored
 
         if os.path.isdir(path):
             # Remove trailing slash
@@ -72,7 +76,7 @@ class LocalPathDependency(base.AbstractDependency):
                 path = path[:-1]
             name = os.path.basename(path)
             shutil.copytree(
-                path, os.path.join(output_dir, name), ignore=_ignore_func
+                path, os.path.join(output_dir, name), ignore=self._ignore_func
             )
             self._local_path = os.path.join(output_dir, name)
         else:
