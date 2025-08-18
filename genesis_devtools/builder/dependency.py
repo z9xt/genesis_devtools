@@ -48,12 +48,8 @@ class LocalPathDependency(base.AbstractDependency):
         """Local path to the dependency."""
         return self._local_path
 
-    def _ignore_func(self, dirpath: str, names: list[str]) -> list[str] | None:
+    def _ignore_func(self, dirpath: str, names: list[str]) -> list[str]:
         # Ignore files based on the exclude patterns.
-
-        if not self._exclude:
-            return None
-
         ignored: set[str] = set()
 
         for pattern in self._exclude:
@@ -75,8 +71,9 @@ class LocalPathDependency(base.AbstractDependency):
             if path.endswith("/"):
                 path = path[:-1]
             name = os.path.basename(path)
+            ignore_func = self._ignore_func if self._exclude else None
             shutil.copytree(
-                path, os.path.join(output_dir, name), ignore=self._ignore_func
+                path, os.path.join(output_dir, name), ignore=ignore_func
             )
             self._local_path = os.path.join(output_dir, name)
         else:
